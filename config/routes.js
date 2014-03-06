@@ -1,6 +1,4 @@
-module.exports = function(app){
-
-
+module.exports = function(app) {
 	/* user routes */
 
 	var user = require('../app/controllers/user');
@@ -17,13 +15,26 @@ module.exports = function(app){
 	/* game routes */
 
 	var games = require('../app/controllers/games');
-	app.post('/games/create/:sessionKey', games.create);
 	app.get('/games/open/:sessionKey', games.getOpen);
 	app.get('/games/my-active/:sessionKey', games.getMyActive);
 
-	app.get('/games/all', games.getAll);
+	app.post('/games/create/:sessionKey', games.create);
+	app.put('/games/:id/join/:sessionKey', games.join);
+	
+	app.put('/games/:id/start/:sessionKey', games.start);
+	app.get('/games/:id/remove', games.remove);
+	app.get('/games/:id/leave/:sessionKey', games.leave);
 
+	app.get('/games/all', games.getAll);
 	app.get('/games/createSample', games.createSample);
 	app.get('/games/createSampleActive', games.createSampleActive);
+	app.get('/games/createSampleFull/:sessionKey', games.createSampleFull);
 	app.get('/games/remove', games.removeAll);
+
+	/* battle routes */
+
+	var battle = require('../app/controllers/battle');
+	app.get('/battle/all', battle.getAll);
+
+	app.get('/battle/remove-all', battle.removeAll);
 };

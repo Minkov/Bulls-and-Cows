@@ -1,38 +1,38 @@
-'use strict';
+"use strict";
 
 var mongoose = require('mongoose'),
 	User = mongoose.model('User');
 
-if(!String.prototype.insertAt){
+if (!String.prototype.insertAt) {
 	String.prototype.insertAt = function(index, str) {
-		if(index===0){
+		if (index === 0) {
 			return str + this;
 		}
 		return this.substr(0, index) + str + this.substr(index, this.length - index);
 	};
 }
 
-function generateSessionKey(){
+function generateSessionKey() {
 	var sessionKeyLength = 50,
-			sessionKeyChars = 'qwertyuiopasdfghjklzxcvbnm0987654123',
-			sessionKey = [],
-			i,
-			insertIndex,
-			char;
-			while(sessionKey.length <= 50){
-				char = sessionKeyChars[Math.floor(Math.random() * sessionKeyChars.length)];
-				insertIndex = Math.floor(Math.random()*sessionKey.length);
-				sessionKey.splice(insertIndex, 0, char);
-			}
-			return sessionKey.join('');
+		sessionKeyChars = 'qwertyuiopasdfghjklzxcvbnm0987654123',
+		sessionKey = [],
+		i,
+		insertIndex,
+		char;
+	while (sessionKey.length <= 50) {
+		char = sessionKeyChars[Math.floor(Math.random() * sessionKeyChars.length)];
+		insertIndex = Math.floor(Math.random() * sessionKey.length);
+		sessionKey.splice(insertIndex, 0, char);
+	}
+	return sessionKey.join('');
 }
 
-exports.register = function(req, res){
-	if(!req.body.hasOwnProperty('username') ||
-		!req.body.hasOwnProperty('nickname') ||
-		!req.body.hasOwnProperty('authCode')){
+exports.register = function(req, res) {
+	if (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('nickname') || !req.body.hasOwnProperty('authCode')) {
 		res.status(400);
-		return res.json({message: 'missing user data'});
+		return res.json({
+			message: 'missing user data'
+		});
 	}
 	var user = new User({
 		username: req.body.username,
@@ -40,34 +40,37 @@ exports.register = function(req, res){
 		authCode: req.body.authCode
 	});
 
-  User.find().exec()
-  	.then(function(users){
-			for(var i = 0; i < users.length; i+=1){
-				if(users[i].username === user.username){
+	User.find().exec()
+		.then(function(users) {
+			for (var i = 0; i < users.length; i += 1) {
+				if (users[i].username === user.username) {
 					res.status(400);
-					return res.json({ message: "duplicated username",
-														errCode: "ERR_DUP_USR"});
-				} 
-				else if(users[i].nickname === user.nickname){
+					return res.json({
+						message: "duplicated username",
+						errCode: "ERR_DUP_USR"
+					});
+				} else if (users[i].nickname === user.nickname) {
 					res.status(400);
-					return res.json({ message: "duplicated nickname",
-														errCode: "ERR_DUP_NICK"});
-				};
+					return res.json({
+						message: "duplicated nickname",
+						errCode: "ERR_DUP_NICK"
+					});
+				}
 			}
 			return user.save();
 		})
-		.then(function(dbUser){
-			console.log('User created!');
+		.then(function(dbUser) {
 			res.status(201);
 			res.json(true);
-		})
+		});
 };
 
-exports.login = function(req, res){
-	if(!req.body.hasOwnProperty('username') ||
-		!req.body.hasOwnProperty('authCode')){
+exports.login = function(req, res) {
+	if (!req.body.hasOwnProperty('username') || !req.body.hasOwnProperty('authCode')) {
 		res.status(400);
-		return res.json({message: 'missing user data'});
+		return res.json({
+			message: 'missing user data'
+		});
 	}
 
 	var user = new User({
@@ -76,25 +79,31 @@ exports.login = function(req, res){
 	}),
 		dbUser;
 
-  User.find().exec()
-  	.then(function(users){
-			for(var i = 0; i < users.length; i+=1){
-				if(users[i].username === user.username){
+	User.find().exec()
+		.then(function(users) {
+			for (var i = 0; i < users.length; i += 1) {
+				if (users[i].username === user.username) {
 					dbUser = users[i];
 					break;
 				}
 			}
-			if(!dbUser || dbUser.authCode !== user.authCode){
+			if (!dbUser || dbUser.authCode !== user.authCode) {
 				res.status(404);
-				return res.json({message: 'Invalid user credentials'});
+				return res.json({
+					message: 'Invalid user credentials'
+				});
 			}
 
-			return User.update({_id: dbUser.get('id')}, {sessionKey: generateSessionKey()}).exec();
+			return User.update({
+				_id: dbUser.get('id')
+			}, {
+				sessionKey: generateSessionKey()
+			}).exec();
 		})
-		.then(function(){
+		.then(function() {
 			return User.findById(dbUser.get('id')).exec();
 		})
-		.then(function(user){
+		.then(function(user) {
 			res.json({
 				nickname: user.get('nickname'),
 				sessionKey: user.get('sessionKey')
@@ -102,45 +111,45 @@ exports.login = function(req, res){
 		});
 };
 
-exports.logout = function(req, res){
-	if(!req.params.sessionKey){
+exports.logout = function(req, res) {
+	if (!req.params.sessionKey) {
 		res.status(400);
-		return res.json({message: 'missing sessionKey'});
+		return res.json({
+			message: 'missing sessionKey'
+		});
 	}
 	User.find().exec()
-		.then(function(users){
-			console.log(req.params.sessionKey);
-			for(var i = 0; i < users.length; i+=1){
-				if(users[i].get('sessionKey') && users[i].get('sessionKey') === req.params.sessionKey){
-					return User.update({_id: users[i].get('id')}, {sessionKey:''}).exec();
+		.then(function(users) {
+			for (var i = 0; i < users.length; i += 1) {
+				if (users[i].get('sessionKey') && users[i].get('sessionKey') === req.params.sessionKey) {
+					return User.update({
+						_id: users[i].get('id')
+					}, {
+						sessionKey: ''
+					}).exec();
 				}
 			}
 		})
-		.then(function(){
-			console.log('User logged out');
+		.then(function() {
 			res.json(true);
 		});
-}
+};
 
-exports.scores = function(req, res){
+exports.scores = function(req, res) {
 	User.find().exec()
-		.then(function(users){
+		.then(function(users) {
 			res.json(users);
 		});
-}
+};
 
-exports.removeAll = function(req, res){
+exports.removeAll = function(req, res) {
 	User.find().exec()
-		.then(function(users){
-			console.log(users);
-			for(var i = 0; i< users.length; i+=1){
+		.then(function(users) {
+			for (var i = 0; i < users.length; i += 1) {
 				var userId = users[i].get("id");
-				users[i].remove()
-					.then(function(){
-						console.log("User with id: " + userId + " was successfully deleted");
-					});
+				users[i].remove();
 			}
-		}, function(err){
+		}, function(err) {
 			res.json(err);
 		});
-}
+};
