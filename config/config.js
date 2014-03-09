@@ -9,7 +9,8 @@ var config = {
       name: 'bulls-and-cows'
     },
     port: 3000,
-    db: 'mongodb://localhost/bulls-and-cows-development'
+    // db: 'mongodb://localhost/bulls-and-cows-development'
+      db: 'mongodb://AdminMaster:123456q@ds027738.mongolab.com:27738/battle-game'
   },
 
   test: {
@@ -18,7 +19,8 @@ var config = {
       name: 'bulls-and-cows'
     },
     port: 3000,
-    db: 'mongodb://localhost/bulls-and-cows-test'
+    // db: 'mongodb://localhost/bulls-and-cows-test'
+      db: 'mongodb://AdminMaster:123456q@ds027738.mongolab.com:27738/battle-game'
   },
 
   production: {
@@ -27,7 +29,8 @@ var config = {
       name: 'bulls-and-cows'
     },
     port: 3000,
-    db: 'mongodb://localhost/bulls-and-cows-production'
+    // db: 'mongodb://localhost/bulls-and-cows-production'
+      db: 'mongodb://AdminMaster:123456q@ds027738.mongolab.com:27738/battle-game'
   }
 };
 
